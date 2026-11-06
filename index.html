@@ -462,7 +462,7 @@ body.edit-mode .frame .hint,body.edit-mode .status{z-index:5}
   <div class="gal-head"><button type="button" class="gal-x" id="galClose" aria-label="בית"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9.5h4.5v-5.5h3v5.5H18V10"/></svg></button>
     <div class="gal-t"><small>SAVED · שמורים</small><b>הגלריה שלי</b></div><button type="button" class="gal-x" id="galAdd" aria-label="הוספת תמונה לגלריה"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><input id="galFile" class="vh" type="file" accept="image/*" multiple></div>
   <div class="seg2 galf" role="radiogroup" aria-label="סינון"><button type="button" role="radio" data-f="ed" aria-checked="true">ערוכות</button><button type="button" role="radio" data-f="no" aria-checked="false">תמונות שהועלו</button></div>
-  <div class="galseg1 galnetrow" id="galNetRow"><button type="button" class="galnet" role="switch" aria-checked="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 15c0-6 3-10 7-10s7 4 7 10"/><path d="M5 15h14M7 9.5l9 5.5M17 9.5 8 15M12 5v10"/></svg>עם רשת</button></div>
+  <div class="galseg1 galnetrow" id="galNetRow"><button type="button" class="galnet" id="galVideo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="M16 10.5 21 8v8l-5-2.5z"/></svg>סרטון</button><button type="button" class="galnet" role="switch" aria-checked="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 15c0-6 3-10 7-10s7 4 7 10"/><path d="M5 15h14M7 9.5l9 5.5M17 9.5 8 15M12 5v10"/></svg>עם רשת</button></div>
   <div class="gal-grid" id="galGrid"></div>
   <p class="gal-empty" id="galEmpty">עוד אין כאן תמונות. במסך התוצאה לוחצים על ❤ והתמונה נשמרת כאן.</p>
   <p class="gal-note">התמונות נשמרות רק בטלפון הזה, בדפדפן הזה.</p>
@@ -2312,6 +2312,42 @@ document.querySelectorAll(".galnet").forEach(b=>b.addEventListener("click",()=>{
   st.addEventListener("pointerup",e=>{const was=lpOn;endLp();if(was){sx=null;return;}if(sx==null)return;const dx=e.clientX-sx,dy=e.clientY-sy;sx=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))galShowAt(galIdx+(dx>0?1:-1),dx>0?1:-1);else if(Math.hypot(dx,dy)<12)$("#galBig").classList.toggle("solo");});
   st.addEventListener("pointercancel",()=>{sx=null;endLp();});
 }
+// a short film of the first five edited pictures, like the home slideshow: before, then after (net and stickers in turn), soft cross-fades
+async function galMakeVideo(){
+  const items=galAll.filter(galIsEd).sort(galOrd).slice(0,5);
+  if(items.length<2){toast("צריך לפחות 2 תמונות ערוכות בגלריה");return;}
+  const VW=720,VH=960,c=document.createElement("canvas");c.width=VW;c.height=VH;const g=c.getContext("2d");
+  const load=async(it,v)=>{const u=await galCropUrl(it,v);const im=new Image();im.src=u;await im.decode();return im;};
+  const frames=[];
+  for(let i=0;i<items.length;i++){const it=items[i],useNet=(i%2===0&&it.blobNet)||!it.blobTape;
+    frames.push(await load(it,"before"));frames.push(await load(it,useNet?"net":"tape"));}
+  const draw=(im,a)=>{const s=Math.max(VW/im.width,VH/im.height),w=im.width*s,h=im.height*s;g.globalAlpha=a;g.drawImage(im,(VW-w)/2,(VH-h)*0.4,w,h);g.globalAlpha=1;};
+  const types=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm"],type=types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t));
+  if(!type||!c.captureStream){toast("הטלפון הזה לא יכול להקליט סרטון מהדפדפן");return;}
+  const ov=document.createElement("div");ov.className="vid-wait";ov.innerHTML='<div><span class="spin"></span><b>מכין סרטון…</b><small>כ-25 שניות</small></div>';document.body.appendChild(ov);
+  try{
+    const st=c.captureStream(30),rec=new MediaRecorder(st,{mimeType:type,videoBitsPerSecond:5e6}),chunks=[];
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+    const done=new Promise(r=>rec.onstop=r);
+    const HOLD=1700,FADE=800,per=HOLD,total=frames.length*per+FADE;
+    draw(frames[0],1);rec.start(250);const t0=performance.now();
+    await new Promise(res=>{const tick=()=>{const t=performance.now()-t0;if(t>=total){res();return;}
+      const k=Math.min(frames.length-1,Math.floor(t/per)),f=t-k*per;g.fillStyle="#000";g.fillRect(0,0,VW,VH);
+      draw(frames[k],1);
+      if(f<FADE&&k>0){draw(frames[k-1],1);draw(frames[k],f/FADE);}
+      if(k===frames.length-1&&f>per-0.001){} 
+      requestAnimationFrame(tick);};tick();});
+    // end on the first picture again so the film loops cleanly
+    const tE=performance.now();await new Promise(res=>{const tick=()=>{const f=performance.now()-tE;if(f>=FADE){res();return;}draw(frames[frames.length-1],1);draw(frames[0],f/FADE);requestAnimationFrame(tick);};tick();});
+    rec.stop();await done;
+    const blob=new Blob(chunks,{type:type.split(";")[0]}),ext=type.includes("mp4")?"mp4":"webm";
+    ov.remove();
+    let dl=null;try{dl=await window.claude?.use?.("downloads");}catch(_){}
+    if(dl){try{await dl.save({filename:"tiruoti-video."+ext,data:blob});toast("הסרטון נשמר");return;}catch(e){if(e&&e.code==="declined")return;}}
+    const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="tiruoti-video."+ext;document.body.appendChild(a);a.click();a.remove();toast("הסרטון נשמר");
+  }catch(e){ov.remove();toast("לא הצלחתי להכין סרטון");console.warn(e);}
+}
+$("#galVideo").addEventListener("click",galMakeVideo);
 $("#galAdd").addEventListener("click",()=>$("#galFile").click());
 $("#galFile").addEventListener("change",async e=>{const fs=[...e.target.files];e.target.value="";if(!fs.length)return;let n=0;
   for(const f of fs){try{let img;try{img=await loadImg(await readAsDataURL(f));}catch(_){img=await createImageBitmap(f);}
@@ -3219,6 +3255,10 @@ body.m-result .seg2.s-result #netOnBtn[aria-checked="true"]{background:var(--acc
 #galNetRow .galnet{height:40px;min-width:0;padding:0 22px;font-size:14px}
 </style>
 <style>#galNetRow .galnet{display:flex!important;align-items:center;justify-content:center;gap:8px;height:48px!important;min-width:140px!important;padding:0 22px!important;border-radius:24px!important;font-size:16px!important;font-weight:700}</style>
+<style>#galNetRow{gap:10px}
+.vid-wait{position:fixed;inset:0;z-index:90;background:rgba(10,14,16,.85);display:grid;place-items:center;color:#F5F5F4}
+.vid-wait>div{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:17px}.vid-wait small{color:#A1A1AA;font-size:13px}
+.vid-wait .spin{width:28px;height:28px;border-width:3px}</style>
 <style>.gal-stage.before::after{content:none!important;display:none!important}
 #galBig.solo{background:#000!important;padding:0!important;gap:0!important}
 #galBig.solo>:not(.gal-stage){display:none!important}
