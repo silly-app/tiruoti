@@ -2315,7 +2315,7 @@ document.querySelectorAll(".galnet").forEach(b=>b.addEventListener("click",()=>{
 // a short film of the first five edited pictures, like the home slideshow: before, then after (net and stickers in turn), soft cross-fades
 // choose the people for the film: tap to add in order (1..5), tap again to remove
 function galVideoPick(){
-  const all=galAll.filter(galIsEd).sort(galOrd);
+  const all=galAll.filter(it=>it.blobBefore&&(galIsEd(it)||(it.edit!==null&&it.blobNet&&it.blobNet!==it.blobBefore))).sort(galOrd);
   if(all.length<2){toast("צריך לפחות 2 תמונות ערוכות בגלריה");return;}
   let sel=all.slice(0,Math.min(5,all.length)).map(it=>it.id);
   const ov=document.createElement("div");ov.className="vp";
