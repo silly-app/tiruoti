@@ -2160,12 +2160,12 @@ function resetHeart(){heartId=null;paintHeart();}
 async function galCountRefresh(){try{const all=await GDB.all();const n=all.length;const c=$("#galCount");c.textContent=n;c.hidden=!n;homeShow(all);}catch(_){try{homeShow([]);}catch(__){}}document.body.classList.remove("home-pending");}
 // the home screen shows your own saved looks, before -> after, instead of the tutorial
 const hs={items:[],i:0,ph:0,tm:0,urls:[],net:false,all:[]};
-const SLIDES=["sl/s1.jpg","sl/s2.jpg","sl/s3.jpg","sl/s4.jpg","sl/s5.jpg","sl/s6.jpg","sl/s7.jpg"],SLIDE_MS=2500;
+const SLIDES=[1,2,3,4,5,6,7],SLIDE_MS=1700;
 function homeShow(){
   clearInterval(hs.tm);
   document.body.classList.add("home-gal");$("#gShow").hidden=false;requestAnimationFrame(()=>{try{frameSize();}catch(_){}});
   if(typeof demoPlay==="function")demoPlay(false);
-  hs.single=true;hs.items=SLIDES.map(u=>({b:u,a:u,n:u,t:u}));
+  hs.single=false;hs.items=SLIDES.map(k=>({b:"sl/b"+k+".jpg",a:"sl/s"+k+".jpg",n:"sl/s"+k+".jpg",t:"sl/s"+k+".jpg"}));
   hs.i=0;hs.ph=0;homeStep(true);hs.tm=setInterval(()=>homeStep(false),SLIDE_MS);
 }
 function homeGo(dir){ // jump to the previous/next person, starting from their "before"
@@ -2248,7 +2248,7 @@ function galUrl(it,v){const k=it.id+v;if(!galUrl.c)galUrl.c=new Map();if(!galUrl
 function paintGalSeg(){document.querySelectorAll(".galnet").forEach(b=>b.setAttribute("aria-checked",galShow==="net"?"true":"false"));}
 let galAll=[],galFilt="ed";
 const galIsEd=it=>!!(it.edit&&it.edit.P);
-function galApply(){galItems=galAll.filter(it=>galFilt==="ed"?galIsEd(it):!galIsEd(it));{const r=$("#galNetRow");if(r)r.hidden=galFilt!=="ed";}document.querySelectorAll(".galf button").forEach(b=>b.setAttribute("aria-checked",b.dataset.f===galFilt?"true":"false"));}
+function galApply(){galItems=galAll.slice();{const r=$("#galNetRow");if(r)r.hidden=false;}document.querySelectorAll(".galf button").forEach(b=>b.setAttribute("aria-checked",b.dataset.f===galFilt?"true":"false"));}
 function galEditItem(it){if(!it||!it.blobBefore)return;$("#galBig").hidden=true;$("#galView").hidden=true;loadFile(it.blobBefore,it);}
 function galRender(){
   galApply();
@@ -3279,6 +3279,7 @@ body.m-result .seg2.s-result #netOnBtn[aria-checked="true"]{background:var(--acc
 </style>
 <style>#galNetRow .galnet{display:flex!important;align-items:center;justify-content:center;gap:8px;height:48px!important;min-width:140px!important;padding:0 22px!important;border-radius:24px!important;font-size:16px!important;font-weight:700}</style>
 <style>#gsNet{display:none!important}
+.galf{display:none!important}
 #galNetRow{gap:10px}
 .vp{position:fixed;inset:0;z-index:85;background:#0F0F10;color:#F5F5F4;display:flex;font-family:Rubik,system-ui,sans-serif;direction:rtl}
 .vp-box{flex:1;display:flex;flex-direction:column;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(16px + env(safe-area-inset-bottom,0px));min-height:0}
