@@ -2160,20 +2160,17 @@ function resetHeart(){heartId=null;paintHeart();}
 async function galCountRefresh(){try{const all=await GDB.all();const n=all.length;const c=$("#galCount");c.textContent=n;c.hidden=!n;homeShow(all);}catch(_){try{homeShow([]);}catch(__){}}document.body.classList.remove("home-pending");}
 // the home screen shows your own saved looks, before -> after, instead of the tutorial
 const hs={items:[],i:0,ph:0,tm:0,urls:[],net:false,all:[]};
-function homeShow(all){
-  if(all)hs.all=all;else all=hs.all;const items=(all||[]).filter(it=>it.blobBefore&&(it.blobNet||it.blobTape)&&it.edit&&it.edit.P).sort(galOrd).slice(0,12);
-  clearInterval(hs.tm);hs.urls.forEach(u=>URL.revokeObjectURL(u));hs.urls=[];
-  // no pictures of your own yet: show the built-in examples instead of the drawn tutorial
-  const EX=["sofa","office","glasses","beard2","party"],useEx=!items.length;
-  const on=true;document.body.classList.toggle("home-gal",on);$("#gShow").hidden=!on;requestAnimationFrame(()=>{try{frameSize();}catch(_){}});
+const SLIDES=["sl/s1.jpg","sl/s2.jpg","sl/s3.jpg","sl/s4.jpg","sl/s5.jpg","sl/s6.jpg","sl/s7.jpg"],SLIDE_MS=2500;
+function homeShow(){
+  clearInterval(hs.tm);
+  document.body.classList.add("home-gal");$("#gShow").hidden=false;requestAnimationFrame(()=>{try{frameSize();}catch(_){}});
   if(typeof demoPlay==="function")demoPlay(false);
-  if(useEx)hs.items=EX.map(n=>({b:"ex/"+n+"_b.jpg",n:"ex/"+n+"_n.jpg",t:"ex/"+n+"_t.jpg",a:"ex/"+n+(hs.net?"_n":"_t")+".jpg"}));
-  else hs.items=items.map((it,i)=>{const b=URL.createObjectURL(it.blobBefore),n=URL.createObjectURL(it.blobNet||it.blobTape),t=URL.createObjectURL(it.blobTape||it.blobNet);hs.urls.push(n,t,b);return {b,n,t,a:hs.net?n:t};});
-  hs.i=0;hs.ph=0;homeStep(true);hs.tm=setInterval(()=>homeStep(false),1700);
+  hs.single=true;hs.items=SLIDES.map(u=>({b:u,a:u,n:u,t:u}));
+  hs.i=0;hs.ph=0;homeStep(true);hs.tm=setInterval(()=>homeStep(false),SLIDE_MS);
 }
 function homeGo(dir){ // jump to the previous/next person, starting from their "before"
-  if(!hs.items.length)return;const cur=hs.ph===1?hs.i:(hs.i-1+hs.items.length)%hs.items.length;
-  hs.i=(cur+dir+hs.items.length)%hs.items.length;hs.ph=0;clearInterval(hs.tm);homeStep(false);hs.tm=setInterval(()=>homeStep(false),1700);}
+  if(!hs.items.length)return;const L=hs.items.length,cur=hs.single?(hs.i-1+L)%L:(hs.ph===1?hs.i:(hs.i-1+L)%L);
+  hs.i=(cur+dir+L)%L;hs.ph=0;clearInterval(hs.tm);homeStep(false);hs.tm=setInterval(()=>homeStep(false),hs.single?SLIDE_MS:1700);}
 {const nb=document.getElementById("gsNet");nb.addEventListener("pointerdown",e=>e.stopPropagation());nb.addEventListener("click",e=>{e.stopPropagation();hs.net=!hs.net;nb.setAttribute("aria-checked",hs.net?"true":"false");
     hs.items.forEach(x=>{x.a=hs.net?x.n:x.t;});
     if(hs.items.length&&hs.ph===0&&hs.top){const cur=hs.items[(hs.i-1+hs.items.length)%hs.items.length];if(cur)hs.top.src=cur.a;}});}
@@ -2183,9 +2180,17 @@ document.getElementById("gsNext").addEventListener("click",()=>homeGo(1));
   g.addEventListener("pointerdown",e=>{if(e.target.closest(".gs-nav"))return;sx=e.clientX;sy=e.clientY;});
   g.addEventListener("pointerup",e=>{if(sx==null)return;const dx=e.clientX-sx,dy=e.clientY-sy;sx=null;if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy))homeGo(dx<0?1:-1);});
   g.addEventListener("pointercancel",()=>{sx=null;});}
+function homeShowUrl(url,first){
+  const A=$("#gsA"),B=$("#gsB");
+  if(first){A.src=url;A.style.zIndex=2;B.style.zIndex=1;A.classList.add("show");B.classList.remove("show");hs.top=A;return;}
+  const show=hs.top===A?B:A,hide=hs.top;show.src=url;show.style.zIndex=2;hide.style.zIndex=1;
+  const go=()=>{show.classList.add("show");hide.classList.remove("show");hs.top=show;};
+  if(show.complete)requestAnimationFrame(go);else show.onload=()=>requestAnimationFrame(go);
+}
 function homeStep(first){
   if(mode!=="choose"||!hs.items.length)return;
   // sequence: before, after (with net), next person's before, ... every change is a soft cross-fade
+  if(hs.single){const url=hs.items[hs.i].b;hs.i=(hs.i+1)%hs.items.length;hs.ph=0;return homeShowUrl(url,first);}
   const it=hs.items[hs.i],url=hs.ph===0?it.b:it.a;
   if(hs.ph===1)hs.i=(hs.i+1)%hs.items.length;hs.ph=1-hs.ph;
   const A=$("#gsA"),B=$("#gsB");
@@ -3273,7 +3278,8 @@ body.m-result .seg2.s-result #netOnBtn[aria-checked="true"]{background:var(--acc
 #galNetRow .galnet{height:40px;min-width:0;padding:0 22px;font-size:14px}
 </style>
 <style>#galNetRow .galnet{display:flex!important;align-items:center;justify-content:center;gap:8px;height:48px!important;min-width:140px!important;padding:0 22px!important;border-radius:24px!important;font-size:16px!important;font-weight:700}</style>
-<style>#galNetRow{gap:10px}
+<style>#gsNet{display:none!important}
+#galNetRow{gap:10px}
 .vp{position:fixed;inset:0;z-index:85;background:#0F0F10;color:#F5F5F4;display:flex;font-family:Rubik,system-ui,sans-serif;direction:rtl}
 .vp-box{flex:1;display:flex;flex-direction:column;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(16px + env(safe-area-inset-bottom,0px));min-height:0}
 .vp-h{display:grid;grid-template-columns:46px 1fr 46px;align-items:center;text-align:center}.vp-h b{font-size:19px}
