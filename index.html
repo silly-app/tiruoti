@@ -14,7 +14,13 @@
 if(!window.claude){window.claude={use:async n=>n==="downloads"?{save:async({filename,data})=>{
   try{const f=new File([data],filename,{type:data.type||"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){await navigator.share({files:[f]});return;}}catch(e){if(e&&e.name==="AbortError")return;}
   const u=URL.createObjectURL(data),a=document.createElement("a");a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);}}:null};}
-if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+// always check for a newer version when the app opens (and when it comes back to the front); reload once when it arrives
+if("serviceWorker" in navigator){
+  const had=!!navigator.serviceWorker.controller;let reloaded=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!reloaded){reloaded=true;location.reload();}});
+  addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{r.update();
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")r.update();});}).catch(()=>{}));
+}
 </script>
 </head>
 <body>
