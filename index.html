@@ -2170,7 +2170,7 @@ function homeShow(){
   hs.single=false;hs.items=SLIDES.map(k=>({b:"sl/b"+k+".jpg",a:"sl/s"+k+".jpg",n:"sl/s"+k+".jpg",t:"sl/s"+k+".jpg"}));
   hs.i=0;hs.ph=0;homeStep(true);hs.tm=setInterval(()=>homeStep(false),SLIDE_MS);
 }
-function homeGo(dir){ // jump to the previous/next person, starting from their "before"
+function homeGo(dir){return; // jump to the previous/next person, starting from their "before"
   if(!hs.items.length)return;const L=hs.items.length,cur=hs.single?(hs.i-1+L)%L:(hs.ph===1?hs.i:(hs.i-1+L)%L);
   hs.i=(cur+dir+L)%L;hs.ph=0;clearInterval(hs.tm);homeStep(false);hs.tm=setInterval(()=>homeStep(false),hs.single?SLIDE_MS:1700);}
 {const nb=document.getElementById("gsNet");nb.addEventListener("pointerdown",e=>e.stopPropagation());nb.addEventListener("click",e=>{e.stopPropagation();hs.net=!hs.net;nb.setAttribute("aria-checked",hs.net?"true":"false");
@@ -3281,6 +3281,8 @@ body.m-result .seg2.s-result #netOnBtn[aria-checked="true"]{background:var(--acc
 </style>
 <style>#galNetRow .galnet{display:flex!important;align-items:center;justify-content:center;gap:8px;height:48px!important;min-width:140px!important;padding:0 22px!important;border-radius:24px!important;font-size:16px!important;font-weight:700}</style>
 <style>#gsNet{display:none!important}
+#galVideo{display:none!important}
+#gShow{pointer-events:none}
 .galf{display:none!important}
 #galNetRow{gap:10px}
 .vp{position:fixed;inset:0;z-index:85;background:#0F0F10;color:#F5F5F4;display:flex;font-family:Rubik,system-ui,sans-serif;direction:rtl}
