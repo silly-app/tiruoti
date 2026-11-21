@@ -2173,7 +2173,7 @@ function resetHeart(){heartId=null;paintHeart();}
 async function galCountRefresh(){try{const all=await GDB.all();const n=all.length;const c=$("#galCount");c.textContent=n;c.hidden=!n;homeShow(all);}catch(_){try{homeShow([]);}catch(__){}}document.body.classList.remove("home-pending");}
 // the home screen shows your own saved looks, before -> after, instead of the tutorial
 const hs={items:[],i:0,ph:0,tm:0,urls:[],net:false,all:[]};
-const SLIDES=[1,2,3,4,5,6,7],SLIDE_MS=1700;
+const SLIDES=[1,2,3,4,6,7],SLIDE_MS=1700;
 function homeShow(){
   clearInterval(hs.tm);
   document.body.classList.add("home-gal");$("#gShow").hidden=false;requestAnimationFrame(()=>{try{frameSize();}catch(_){}});
