@@ -443,7 +443,7 @@ body.edit-mode .frame .hint,body.edit-mode .status{z-index:5}
       </div>
     </div>
     <div class="b3row" id="pResult" hidden>
-      <button type="button" class="b3" id="againBtn"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="13.5" height="13.5" rx="2.5"/><path d="M4 16.5V6a2.5 2.5 0 0 1 2.5-2.5H17"/><circle cx="16" cy="11.2" r="1.3"/><path d="M7 18l4-4 3 3 1.8-1.8 4.7 4.7"/></svg><b>חזרה</b></button><button type="button" id="shareBtn" hidden></button>
+      <button type="button" class="b3" id="againBtn"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><b>חזרה</b></button><button type="button" id="shareBtn" hidden></button>
       <button type="button" class="b3 primary" id="saveBtn"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><b id="saveLbl">שמירה</b></button>
       <button type="button" class="b3" id="backPlace"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><b>עריכה</b></button>
     </div>
@@ -3319,8 +3319,13 @@ body.m-result .seg2.s-result #netOnBtn[aria-checked="true"]{background:var(--acc
 #galBig.solo .gal-stage{position:fixed;inset:0}
 #galBig.solo .gal-stage img{max-width:100vw;max-height:100dvh;border-radius:0;border:0}</style>
 <style>.camv-guide,.camv-lbl{display:none!important}
-#galOpen,#stripGal,#savedToast,#toGallery{display:none!important}
+#galOpen,#savedToast,#toGallery{display:none!important}
 #barChoose{grid-template-columns:repeat(2,minmax(0,1fr))!important}</style>
 <script>requestAnimationFrame(()=>{const b=document.getElementById("bootHide");if(b)b.remove();});</script>
+<script>
+// the site has no gallery: take its buttons and screens out of the page entirely
+["galOpen","galView","galBig","savedToast","toGallery","galCount"].forEach(id=>{const e=document.getElementById(id);if(e)e.remove();});
+{const g=document.getElementById("stripGal");if(g){g.innerHTML="";g.setAttribute("aria-hidden","true");g.tabIndex=-1;g.style.cssText="visibility:hidden!important;pointer-events:none";}}
+</script>
 </body>
 </html>
