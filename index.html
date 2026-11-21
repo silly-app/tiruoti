@@ -444,8 +444,8 @@ body.edit-mode .frame .hint,body.edit-mode .status{z-index:5}
       </div>
     </div>
     <div class="b3row" id="pResult" hidden>
-      <button type="button" class="b3" id="againBtn"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="13.5" height="13.5" rx="2.5"/><path d="M4 16.5V6a2.5 2.5 0 0 1 2.5-2.5H17"/><circle cx="16" cy="11.2" r="1.3"/><path d="M7 18l4-4 3 3 1.8-1.8 4.7 4.7"/></svg><b>גלריה</b></button><button type="button" id="shareBtn" hidden></button>
-      <button type="button" class="b3 primary" id="saveBtn"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><b id="saveLbl">שמירה לגלריה</b></button>
+      <button type="button" class="b3" id="againBtn"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="13.5" height="13.5" rx="2.5"/><path d="M4 16.5V6a2.5 2.5 0 0 1 2.5-2.5H17"/><circle cx="16" cy="11.2" r="1.3"/><path d="M7 18l4-4 3 3 1.8-1.8 4.7 4.7"/></svg><b>עוד פעם</b></button><button type="button" id="shareBtn" hidden></button>
+      <button type="button" class="b3 primary" id="saveBtn"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><b id="saveLbl">שמירה</b></button>
       <button type="button" class="b3" id="backPlace"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><b>עריכה</b></button>
     </div>
   </div>
@@ -1931,7 +1931,7 @@ async function openSelfie(){
   try{await camOpenStream();}
   catch(e){camStream=null;$("#tipsView").hidden=false;return;}
   cv.hidden=false;$("#pChoose").hidden=true;
-  const tips=["שיער ארוך אוספים מאחור"];let ti=0;$("#camTip").textContent=tips[0];
+  const tips=["פנים ישר למצלמה","שיער ארוך אוספים מאחור"];let ti=0;$("#camTip").textContent=tips[0];
   clearInterval(openSelfie.iv);openSelfie.iv=setInterval(()=>{if(cv.hidden){clearInterval(openSelfie.iv);return;}ti=(ti+1)%tips.length;$("#camTip").textContent=tips[ti];},2600);
 }
 function closeSelfie(back){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}$("#camView").hidden=true;if(back)$("#pChoose").hidden=false;}
@@ -2168,7 +2168,7 @@ const GDB=(()=>{let dbp=null;
   return {put:it=>run("readwrite",st=>st.put(it)),del:id=>run("readwrite",st=>st.delete(id)),all:()=>run("readonly",st=>st.getAll())};})();
 let heartId=null,galItems=[],galUrls=[],galCur=null;
 function paintHeart(){const b=$("#heartBtn");b.setAttribute("aria-pressed",heartId?"true":"false");b.classList.toggle("on",!!heartId);
-  const sb=$("#saveBtn");if(sb){sb.classList.toggle("done",!!heartId);$("#saveLbl").textContent=heartId?"נשמר בגלריה":"שמירה לגלריה";}}
+  const sb=$("#saveBtn");if(sb){sb.classList.toggle("done",!!heartId);$("#saveLbl").textContent="שמירה";}}
 function hideSavedToast(){const t=$("#savedToast");if(t)t.hidden=true;}
 function resetHeart(){heartId=null;paintHeart();}
 async function galCountRefresh(){try{const all=await GDB.all();const n=all.length;const c=$("#galCount");c.textContent=n;c.hidden=!n;homeShow(all);}catch(_){try{homeShow([]);}catch(__){}}document.body.classList.remove("home-pending");}
@@ -2414,16 +2414,16 @@ galCountRefresh();
 }
 try{new ResizeObserver(()=>{if(mode!=="choose")fit();}).observe($("#frame"));}catch(_){}
 try{new ResizeObserver(()=>{frameSize();if(mode!=="choose")fit();}).observe($("#vw"));}catch(_){}
-$("#saveBtn").addEventListener("click",()=>$("#heartBtn").click());
+// save the picture as it looks now (with or without the net) straight to the phone
+$("#saveBtn").addEventListener("click",async()=>{
+  const pb=opt.before;opt.before=false;headKey="";compose(octx);
+  const blob=await new Promise(r=>out.toBlob(r,"image/jpeg",0.92));opt.before=pb;headKey="";dirty();
+  const name="tiruoti-"+Date.now()+".jpg";let dl=null;try{dl=await window.claude?.use?.("downloads");}catch(_){}
+  if(dl){try{await dl.save({filename:name,data:blob});toast("נשמר");return;}catch(e){if(e&&e.code==="declined")return;}}
+  toast("לא הצלחתי לשמור");});
 $("#toGallery").addEventListener("click",()=>{hideSavedToast();galOpen();});
 $("#stripGal").addEventListener("click",()=>{hideSavedToast();galOpen();});
-$("#againBtn").addEventListener("click",()=>{hideSavedToast();if(heartId){galOpen();return;}
-  let m=$("#saveAsk");if(!m){m=document.createElement("div");m.id="saveAsk";m.innerHTML='<div class="sa-box" role="dialog" aria-modal="true"><b>לשמור את התמונה בגלריה?</b><div class="sa-row"><button type="button" class="sa-y">שמירה</button><button type="button" class="sa-n">בלי לשמור</button></div><button type="button" class="sa-c">ביטול</button></div>';document.body.appendChild(m);
-    m.addEventListener("click",e=>{if(e.target===m)m.hidden=true;});
-    m.querySelector(".sa-c").addEventListener("click",()=>{m.hidden=true;});
-    m.querySelector(".sa-n").addEventListener("click",()=>{m.hidden=true;galOpen();});
-    m.querySelector(".sa-y").addEventListener("click",async()=>{m.hidden=true;$("#heartBtn").click();for(let i=0;i<30&&!heartId;i++)await new Promise(r=>setTimeout(r,200));hideSavedToast();galOpen();});}
-  m.hidden=false;});
+$("#againBtn").addEventListener("click",()=>{hideSavedToast();goMode("choose");});
 $("#shareBtn").addEventListener("click",async()=>{
   const wasBefore=opt.before;opt.before=false;compose(octx);opt.before=wasBefore;
   const card=out;
@@ -3319,7 +3319,9 @@ body.m-result .seg2.s-result #netOnBtn[aria-checked="true"]{background:var(--acc
 #galBig.solo>:not(.gal-stage){display:none!important}
 #galBig.solo .gal-stage{position:fixed;inset:0}
 #galBig.solo .gal-stage img{max-width:100vw;max-height:100dvh;border-radius:0;border:0}</style>
-<style>.camv-guide,.camv-lbl{display:none!important}</style>
+<style>.camv-guide,.camv-lbl{display:none!important}
+#galOpen,#stripGal,#savedToast,#toGallery{display:none!important}
+#barChoose{grid-template-columns:repeat(2,minmax(0,1fr))!important}</style>
 <script>requestAnimationFrame(()=>{const b=document.getElementById("bootHide");if(b)b.remove();});</script>
 </body>
 </html>
