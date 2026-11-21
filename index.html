@@ -443,7 +443,7 @@ body.edit-mode .frame .hint,body.edit-mode .status{z-index:5}
       </div>
     </div>
     <div class="b3row" id="pResult" hidden>
-      <button type="button" class="b3" id="againBtn"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="13.5" height="13.5" rx="2.5"/><path d="M4 16.5V6a2.5 2.5 0 0 1 2.5-2.5H17"/><circle cx="16" cy="11.2" r="1.3"/><path d="M7 18l4-4 3 3 1.8-1.8 4.7 4.7"/></svg><b>עוד פעם</b></button><button type="button" id="shareBtn" hidden></button>
+      <button type="button" class="b3" id="againBtn"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="13.5" height="13.5" rx="2.5"/><path d="M4 16.5V6a2.5 2.5 0 0 1 2.5-2.5H17"/><circle cx="16" cy="11.2" r="1.3"/><path d="M7 18l4-4 3 3 1.8-1.8 4.7 4.7"/></svg><b>חזרה</b></button><button type="button" id="shareBtn" hidden></button>
       <button type="button" class="b3 primary" id="saveBtn"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><b id="saveLbl">שמירה</b></button>
       <button type="button" class="b3" id="backPlace"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><b>עריכה</b></button>
     </div>
@@ -2422,7 +2422,7 @@ $("#saveBtn").addEventListener("click",async()=>{
   toast("לא הצלחתי לשמור");});
 $("#toGallery").addEventListener("click",()=>{hideSavedToast();galOpen();});
 $("#stripGal").addEventListener("click",()=>{hideSavedToast();galOpen();});
-$("#againBtn").addEventListener("click",()=>{hideSavedToast();goMode("choose");$("#camBtn").click();});
+$("#againBtn").addEventListener("click",()=>{hideSavedToast();goMode("choose");});
 $("#shareBtn").addEventListener("click",async()=>{
   const wasBefore=opt.before;opt.before=false;compose(octx);opt.before=wasBefore;
   const card=out;
