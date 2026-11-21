@@ -1414,10 +1414,10 @@ function skullFromSilhouette(){
     const d=pcx.getImageData(0,0,W,H).data,c=Math.cos(P.rot),sn=Math.sin(P.rot);
     const edge=(v,dir)=>{for(let u=0.3;u<2.2;u+=0.01){const x=P.cx+(dir*u*P.rx)*c-(v*P.ry)*sn,y=P.cy+(dir*u*P.rx)*sn+(v*P.ry)*c;
       if(x<0||y<0||x>=W||y>=H)return null;if(d[((y|0)*W+(x|0))*4+3]<110)return u*P.rx;}return null;};
-    const vs=[P.ev-0.12,P.ev-0.22,P.ev-0.32],ws=[];
+    const vs=[P.ev-0.02,P.ev-0.1,P.ev-0.18],ws=[];
     for(const v of vs){const a=edge(v,-1),b=edge(v,1);if(a&&b)ws.push((a+b)/2);}
     if(!ws.length)return;ws.sort((a,b)=>a-b);const sil=ws[0]*0.97;
-    const lo=P.lmHalf*HEAD_W,hi=P.lmHalf*HEAD_W,half=Math.max(lo,Math.min(hi,sil));
+    const lo=P.lmHalf*HEAD_W,hi=P.lmHalf*1.16,half=Math.max(lo,Math.min(hi,sil));
     const aE=Math.asin(Math.max(-0.95,Math.min(0.95,P.ev)));P.rx=half/Math.cos(aE);
     // height: a short or buzzed head sits lower than the model's guess: pull the crown down to the real outline (only ever shorter)
     {let vTop=null;for(let v=P.ev-0.05;v>-1.7;v-=0.01){const x=P.cx-(v*P.ry)*sn,y=P.cy+(v*P.ry)*c;if(x<0||y<0||x>=W||y>=H){vTop=null;break;}if(d[((y|0)*W+(x|0))*4+3]<110){vTop=v;break;}}
