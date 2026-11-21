@@ -12,7 +12,6 @@
 <script>
 // running as its own website (not inside Claude): saving goes straight to the phone, no Claude helpers
 if(!window.claude){window.claude={use:async n=>n==="downloads"?{save:async({filename,data})=>{
-  try{const f=new File([data],filename,{type:data.type||"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){await navigator.share({files:[f]});return;}}catch(e){if(e&&e.name==="AbortError")return;}
   const u=URL.createObjectURL(data),a=document.createElement("a");a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);}}:null};}
 // always check for a newer version when the app opens (and when it comes back to the front); reload once when it arrives
 if("serviceWorker" in navigator){
@@ -2419,11 +2418,11 @@ $("#saveBtn").addEventListener("click",async()=>{
   const pb=opt.before;opt.before=false;headKey="";compose(octx);
   const blob=await new Promise(r=>out.toBlob(r,"image/jpeg",0.92));opt.before=pb;headKey="";dirty();
   const name="tiruoti-"+Date.now()+".jpg";let dl=null;try{dl=await window.claude?.use?.("downloads");}catch(_){}
-  if(dl){try{await dl.save({filename:name,data:blob});toast("נשמר");return;}catch(e){if(e&&e.code==="declined")return;}}
+  if(dl){try{await dl.save({filename:name,data:blob});toast("נשמר בטלפון (בתיקיית ההורדות)");return;}catch(e){if(e&&e.code==="declined")return;}}
   toast("לא הצלחתי לשמור");});
 $("#toGallery").addEventListener("click",()=>{hideSavedToast();galOpen();});
 $("#stripGal").addEventListener("click",()=>{hideSavedToast();galOpen();});
-$("#againBtn").addEventListener("click",()=>{hideSavedToast();goMode("choose");});
+$("#againBtn").addEventListener("click",()=>{hideSavedToast();goMode("choose");$("#camBtn").click();});
 $("#shareBtn").addEventListener("click",async()=>{
   const wasBefore=opt.before;opt.before=false;compose(octx);opt.before=wasBefore;
   const card=out;
