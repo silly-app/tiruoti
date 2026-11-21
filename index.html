@@ -908,12 +908,13 @@ function drawTapeImg(ctx){
   // stay on the skull
   const vEnd=P.ev-0.1,vBand=P.ev-0.42,band=0.17; // below vBand only a strip along the edge of the head stays, ending above the ear
   const inner=v=>v<vBand?0:Math.max(0,wv(v)-band*(1-0.5*Math.max(0,(v-vBand)/(vEnd-vBand))));
+  // the whole skull, minus two temple windows; the middle is left to the stickers' own scalloped front edge
   g.beginPath();for(let i=0;i<=90;i++){const v=-V+(vEnd+V)*i/90;g.lineTo(wv(v)*0.995,v);}
-  for(let i=90;i>=0;i--){const v=-V+(vEnd+V)*i/90;if(v>=vBand)g.lineTo(inner(v),v);}
-  g.lineTo(0,vBand);
-  for(let i=0;i<=90;i++){const v=-V+(vEnd+V)*i/90;if(v>=vBand)g.lineTo(-inner(v),v);}
-  for(let i=90;i>=0;i--){const v=-V+(vEnd+V)*i/90;g.lineTo(-wv(v)*0.995,v);}
-  g.closePath();g.clip();
+  for(let i=90;i>=0;i--){const v=-V+(vEnd+V)*i/90;g.lineTo(-wv(v)*0.995,v);}g.closePath();
+  for(const sd of [1,-1]){g.moveTo(sd*0.42,vBand);
+    for(let i=0;i<=40;i++){const v=vBand+(vEnd-vBand)*i/40;g.lineTo(sd*inner(v),v);}
+    g.lineTo(sd*inner(vEnd),vEnd+0.6);g.lineTo(sd*0.42,vEnd+0.6);g.closePath();}
+  g.clip("evenodd");
   g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";
   // match the light of this photo
   const sl=skin?(0.3*skin[0]+0.59*skin[1]+0.11*skin[2]):166,f=Math.max(0.62,Math.min(1.08,0.55+0.45*sl/166));g.filter=`brightness(${f.toFixed(3)})`;
@@ -3328,5 +3329,6 @@ body.m-result .seg2.s-result #netOnBtn[aria-checked="true"]{background:var(--acc
 {const g=document.getElementById("stripGal");if(g){g.innerHTML="";g.setAttribute("aria-hidden","true");g.tabIndex=-1;g.style.cssText="visibility:hidden!important;pointer-events:none";}}
 </script>
 <style>#brandSub{display:none!important}</style>
+<style>#pChoose{justify-content:flex-start!important}#pChoose #demo{margin-top:3px!important}</style>
 </body>
 </html>
