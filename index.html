@@ -374,7 +374,7 @@ body.edit-mode .frame .hint,body.edit-mode .status{z-index:5}
           <path d="M108 160h84" stroke="#E8F4F0" stroke-width="1.5" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/>
         </svg>
         <div class="camv-lbl l1">קודקוד</div><div class="camv-lbl l2">עיניים</div>
-        <p class="camv-tip" id="camTip">כל הראש בתוך הקו, כולל הקודקוד</p>
+        <p class="camv-tip" id="camTip">שיער ארוך אוספים מאחור</p>
       </div>
       <div class="camv-btns">
         <button type="button" class="camv-x" id="camCancel" aria-label="ביטול"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
@@ -1931,7 +1931,7 @@ async function openSelfie(){
   try{await camOpenStream();}
   catch(e){camStream=null;$("#tipsView").hidden=false;return;}
   cv.hidden=false;$("#pChoose").hidden=true;
-  const tips=["כל הראש בתוך הקו","פנים ישר למצלמה","שיער ארוך אוספים מאחור","עדיף רקע מטושטש"];let ti=0;$("#camTip").textContent=tips[0];
+  const tips=["שיער ארוך אוספים מאחור"];let ti=0;$("#camTip").textContent=tips[0];
   clearInterval(openSelfie.iv);openSelfie.iv=setInterval(()=>{if(cv.hidden){clearInterval(openSelfie.iv);return;}ti=(ti+1)%tips.length;$("#camTip").textContent=tips[ti];},2600);
 }
 function closeSelfie(back){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}$("#camView").hidden=true;if(back)$("#pChoose").hidden=false;}
@@ -3319,6 +3319,7 @@ body.m-result .seg2.s-result #netOnBtn[aria-checked="true"]{background:var(--acc
 #galBig.solo>:not(.gal-stage){display:none!important}
 #galBig.solo .gal-stage{position:fixed;inset:0}
 #galBig.solo .gal-stage img{max-width:100vw;max-height:100dvh;border-radius:0;border:0}</style>
+<style>.camv-guide,.camv-lbl{display:none!important}</style>
 <script>requestAnimationFrame(()=>{const b=document.getElementById("bootHide");if(b)b.remove();});</script>
 </body>
 </html>
